@@ -407,7 +407,9 @@ button {
 
 /* ---- 落下場地 ---- */
 .bubble-field {
+  --area-h: 560px;
   position: relative;
+  height: var(--area-h);
   margin-top: 0.5rem;
   overflow: hidden;
   border-radius: 16px;
@@ -427,8 +429,11 @@ button {
 }
 
 .bubble {
+  --bubble-size: 84px;
   position: absolute;
   top: 0;
+  width: var(--bubble-size);
+  height: var(--bubble-size);
   border-radius: 50%;
   border: none;
   font-size: 1.45rem;
@@ -457,13 +462,13 @@ button {
   outline-offset: 2px;
 }
 
-/* 從場地上方等速落到地面(AREA_HEIGHT 560 − BUBBLE 84 = 476) */
+/* 從場地上方等速落到地面(依 CSS 變數計算,才能隨螢幕縮放) */
 @keyframes fall {
   from {
-    transform: translateY(-84px);
+    transform: translateY(calc(-1 * var(--bubble-size)));
   }
   to {
-    transform: translateY(476px);
+    transform: translateY(calc(var(--area-h) - var(--bubble-size)));
   }
 }
 
@@ -680,4 +685,108 @@ button {
 
 .btn-ghost:hover {
   color: #fff;
+}
+
+/* ---- 手機 RWD ---- */
+@media (max-width: 640px) {
+  .screen {
+    padding: 1rem 0.85rem 3rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
+
+  /* 標題列改直排,控制項換行不擠 */
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .header-controls {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  /* 遊戲上方資訊列換行 */
+  .game-top {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hud {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .prompt-word {
+    font-size: 1.7rem;
+  }
+
+  /* 落下場地與泡泡縮小,避免手機上互相重疊、難點擊 */
+  .bubble-field {
+    --area-h: 440px;
+  }
+
+  .bubble {
+    --bubble-size: 58px;
+    font-size: 1rem;
+  }
+
+  /* 口說挑戰 */
+  .speak-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .speak-meaning {
+    font-size: 1.9rem;
+  }
+
+  .speak-jp {
+    font-size: 1.3rem;
+  }
+
+  /* 模式切換填滿寬度 */
+  .mode-switch {
+    display: flex;
+    width: 100%;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  /* 關卡卡片更密一點 */
+  .level-grid {
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .level-name-ja {
+    font-size: 1.2rem;
+  }
+
+  /* 結算統計 */
+  .result-score {
+    font-size: 2.4rem;
+  }
+
+  .result-stats {
+    gap: 1rem;
+  }
+
+  .result-stats > div {
+    min-width: 60px;
+  }
+
+  /* 排行榜列縮排 */
+  .lb-row {
+    gap: 0.5rem;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.9rem;
+  }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AnimationEvent, MouseEvent } from 'react';
 import type { FallingBubble } from '../game/types.ts';
-import { BUBBLE_SIZE, displayLabel } from '../game/engine.ts';
+import { displayLabel } from '../game/engine.ts';
 import { playAlert } from '../audio/sound.ts';
 
 interface BubbleProps {
@@ -41,8 +41,6 @@ export function Bubble({ bubble, onPick, onLand }: BubbleProps) {
       className={`bubble ${danger ? 'danger' : ''}`}
       style={{
         left: `${bubble.xPercent}%`,
-        width: BUBBLE_SIZE,
-        height: BUBBLE_SIZE,
         animationDuration: `${bubble.fallMs}ms`,
         animationDelay: `${bubble.startDelayMs}ms`,
       }}

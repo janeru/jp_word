@@ -3,7 +3,6 @@ import type { MouseEvent } from 'react';
 import type { Word } from '@jp-word/shared';
 import type { GameOutcome } from '../game/types.ts';
 import { useGame } from '../game/useGame.ts';
-import { AREA_HEIGHT } from '../game/engine.ts';
 import { pointsForMatch } from '../game/scoring.ts';
 import { Bubble } from './Bubble.tsx';
 import { SoundToggle } from './SoundToggle.tsx';
@@ -115,7 +114,7 @@ export function PlayField({ words, accScore, waveLabel, categoryName, onQuit, on
         {feedback?.text ?? ''}
       </div>
 
-      <div ref={fieldRef} className={`bubble-field ${shake ? 'shake' : ''}`} style={{ height: AREA_HEIGHT }}>
+      <div ref={fieldRef} className={`bubble-field ${shake ? 'shake' : ''}`}>
         {game.activeBubbles.map((b) => (
           <Bubble key={b.word.id} bubble={b} onPick={handlePick} onLand={game.land} />
         ))}
