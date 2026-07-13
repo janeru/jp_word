@@ -1,0 +1,32 @@
+{
+  "name": "@jp-word/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "echo \"API 以 tsx 直接執行,不需編譯\"",
+    "start": "NODE_ENV=production tsx src/index.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "migration:generate": "typeorm-ts-node-esm migration:generate -d src/data-source.ts",
+    "migration:run": "typeorm-ts-node-esm migration:run -d src/data-source.ts",
+    "migration:revert": "typeorm-ts-node-esm migration:revert -d src/data-source.ts",
+    "seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@jp-word/shared": "workspace:*",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "pg": "^8.13.1",
+    "reflect-metadata": "^0.2.2",
+    "tsx": "^4.19.2",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  }
+}

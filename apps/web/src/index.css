@@ -1,0 +1,683 @@
+:root {
+  font-family: system-ui, 'Noto Sans TC', 'Noto Sans JP', sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 50% -10%, #1c1e42 0%, #0f1020 60%);
+  color: #e8e8f0;
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---- 版面 ---- */
+.screen {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.screen.center {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-header h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.9rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.name-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #a0a0c8;
+}
+
+.name-field input {
+  width: 90px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #3a3d6e;
+  background: #12132a;
+  color: #e8e8f0;
+  font-size: 0.9rem;
+}
+
+.name-field input:focus {
+  outline: none;
+  border-color: #6c7cff;
+}
+
+/* ---- 排行榜 ---- */
+.leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: #1a1b35;
+  border: 1px solid #23264d;
+  margin-bottom: 0.5rem;
+}
+
+.lb-row.top {
+  border-color: #ffcf5c;
+  background: linear-gradient(160deg, #2a2740, #201d33);
+}
+
+.lb-rank {
+  font-weight: 800;
+  color: #ffcf5c;
+  text-align: center;
+}
+
+.lb-name {
+  font-weight: 700;
+}
+
+.lb-cat {
+  font-size: 0.8rem;
+  color: #a0a0c8;
+}
+
+.lb-score {
+  font-weight: 700;
+  color: #fff;
+}
+
+.sound-toggle {
+  background: #23264d;
+  border: 1px solid #3a3d6e;
+  color: #e8e8f0;
+  border-radius: 10px;
+  padding: 0.35rem 0.6rem;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sound-toggle:hover {
+  border-color: #6c7cff;
+}
+
+.subtitle {
+  color: #a0a0c8;
+  margin: 0.25rem 0;
+}
+
+.error-text {
+  color: #ff8a8a;
+  font-weight: 600;
+}
+
+/* ---- 關卡選擇 ---- */
+.level-group {
+  margin-top: 2rem;
+}
+
+.group-title {
+  font-size: 1.1rem;
+  color: #c8c8f0;
+  border-left: 4px solid #6c7cff;
+  padding-left: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.1rem 0.75rem;
+  border-radius: 16px;
+  border: 1px solid #2c2e58;
+  background: linear-gradient(160deg, #23264d, #1a1b35);
+  color: #e8e8f0;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s;
+}
+
+.level-card:not(.locked):hover {
+  transform: translateY(-3px);
+  border-color: #6c7cff;
+  box-shadow: 0 8px 22px rgba(108, 124, 255, 0.28);
+}
+
+.level-card.cleared {
+  border-color: #ffcf5c;
+  background: linear-gradient(160deg, #2a2740, #201d33);
+}
+
+.level-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.level-no {
+  font-size: 0.72rem;
+  color: #8a8ac0;
+  letter-spacing: 1px;
+}
+
+.level-name-ja {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.level-name-zh {
+  font-size: 0.9rem;
+  color: #b8b8e0;
+}
+
+.level-best {
+  font-size: 0.72rem;
+  color: #ffcf5c;
+}
+
+.level-hint,
+.level-lock {
+  font-size: 0.75rem;
+  color: #8a8ac0;
+}
+
+/* ---- 模式切換 ---- */
+.mode-switch {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+  padding: 0.3rem;
+  background: #16173100;
+  border: 1px solid #2c2e58;
+  border-radius: 14px;
+}
+
+.mode-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #a0a0c8;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mode-btn.active {
+  background: linear-gradient(90deg, #6c7cff, #9b6cff);
+  color: #fff;
+}
+
+.mode-desc {
+  color: #8a8ac0;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
+/* ---- 口說挑戰 ---- */
+.speak-card {
+  max-width: 480px;
+  margin: 2rem auto 0;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #23264d, #1a1b35);
+  border: 1px solid #2c2e58;
+  text-align: center;
+}
+
+.speak-hint {
+  color: #a0a0c8;
+  font-size: 0.95rem;
+}
+
+.speak-meaning {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0.4rem 0;
+}
+
+.speak-jp {
+  font-size: 1.6rem;
+  color: #b6c2ff;
+  margin-bottom: 0.75rem;
+}
+
+.speak-hint-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.listen-btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.reading-hint {
+  color: #ffcf5c;
+  font-weight: 700;
+}
+
+.mic-btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #6c7cff, #9b6cff);
+}
+
+.mic-btn.listening {
+  background: linear-gradient(90deg, #ff6c6c, #ff9d5c);
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+
+.mic-btn:disabled {
+  opacity: 0.7;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 108, 108, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(255, 108, 108, 0);
+  }
+}
+
+.speak-interim {
+  margin-top: 0.8rem;
+  color: #c8c8f0;
+  font-size: 1.1rem;
+  min-height: 1.4rem;
+}
+
+.skip-btn {
+  margin-top: 0.6rem;
+}
+
+/* ---- 遊戲畫面 ---- */
+.game-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hud {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #b8b8e0;
+}
+
+.hud-score {
+  font-weight: 700;
+  color: #fff;
+}
+
+.hud-combo.hot {
+  color: #ff9d5c;
+  font-weight: 700;
+}
+
+.prompt {
+  text-align: center;
+  margin: 1rem 0 0.25rem;
+}
+
+.prompt-hint {
+  color: #a0a0c8;
+  font-size: 1rem;
+}
+
+.prompt-word {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0.2rem;
+}
+
+.feedback {
+  text-align: center;
+  height: 1.5rem;
+  font-weight: 700;
+  transition: opacity 0.2s;
+}
+
+.feedback.ok {
+  color: #5cffb0;
+}
+
+.feedback.ng {
+  color: #ff8a8a;
+}
+
+.feedback.hidden {
+  opacity: 0;
+}
+
+/* ---- 落下場地 ---- */
+.bubble-field {
+  position: relative;
+  margin-top: 0.5rem;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(30, 32, 66, 0.35), rgba(16, 17, 40, 0.65));
+  border: 1px solid #23264d;
+}
+
+/* 地面 */
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  background: linear-gradient(90deg, #6c7cff, #9b6cff);
+  box-shadow: 0 -3px 22px rgba(108, 124, 255, 0.55);
+}
+
+.bubble {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #10122a;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #b6c2ff 45%, #6c7cff 100%);
+  box-shadow: inset -5px -7px 14px rgba(80, 60, 160, 0.35), 0 6px 14px rgba(0, 0, 0, 0.3);
+  /* 由上而下等速落下(時長/延遲由行內樣式指定) */
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  transition: filter 0.1s ease;
+}
+
+/* 用 filter 做互動回饋,避免覆蓋動畫的 transform */
+.bubble:hover {
+  filter: brightness(1.12);
+}
+
+.bubble:active {
+  filter: brightness(0.9);
+}
+
+.bubble.is-target {
+  outline: 3px solid #ffcf5c;
+  outline-offset: 2px;
+}
+
+/* 從場地上方等速落到地面(AREA_HEIGHT 560 − BUBBLE 84 = 476) */
+@keyframes fall {
+  from {
+    transform: translateY(-84px);
+  }
+  to {
+    transform: translateY(476px);
+  }
+}
+
+/* 危險狀態:快落地時轉紅 + 紅圈脈動(脈動放在 ::before,不與落下 transform 衝突) */
+.bubble.danger {
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #ffb0b0 40%, #ff5c5c 100%);
+  color: #3a0000;
+}
+
+.bubble.danger::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 90, 90, 0.75), 0 0 16px rgba(255, 90, 90, 0.7);
+  animation: danger-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes danger-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 點擊命中的擴散環 */
+.fx-burst {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #ffe08a;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: burst 0.5s ease-out forwards;
+}
+
+@keyframes burst {
+  from {
+    opacity: 0.9;
+    width: 20px;
+    height: 20px;
+  }
+  to {
+    opacity: 0;
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* 浮動加分文字 */
+.fx-float {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #ffe08a;
+  font-weight: 800;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: floatUp 0.65s ease-out forwards;
+}
+
+@keyframes floatUp {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -170%);
+  }
+}
+
+/* 點錯時場地震動 */
+.bubble-field.shake {
+  animation: shake 0.32s ease;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+/* ---- 小關過場 ---- */
+.wave-clear {
+  text-align: center;
+  padding: 2.5rem 3rem;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #2a2740, #201d33);
+  border: 1px solid #5cffb0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.wave-clear-big {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #5cffb0;
+  margin-bottom: 0.4rem;
+}
+
+/* ---- 結算 ---- */
+.result-screen {
+  text-align: center;
+}
+
+.result-stars {
+  margin: 1rem 0;
+  color: #ffcf5c;
+}
+
+.fail-note {
+  color: #ff9d5c;
+  margin: 1rem auto 0;
+  max-width: 420px;
+}
+
+.result-score {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 0.5rem;
+}
+
+.result-score small {
+  font-size: 1.2rem;
+  color: #a0a0c8;
+}
+
+.badge-new {
+  display: inline-block;
+  margin-left: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  background: #ffcf5c;
+  color: #3a2a00;
+  vertical-align: middle;
+}
+
+.result-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.8rem 0;
+  flex-wrap: wrap;
+}
+
+.result-stats > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 72px;
+}
+
+.stat-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #a0a0c8;
+}
+
+/* ---- 按鈕 ---- */
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-width: 280px;
+  margin: 2rem auto 0;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #6c7cff, #9b6cff);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #23264d;
+  color: #e8e8f0;
+  border-color: #3a3d6e;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #a0a0c8;
+}
+
+.btn-ghost:hover {
+  color: #fff;
+}
