@@ -1,71 +1,91 @@
-# 部署到 Zeabur(免費線上 Demo)
+# 部署到 Render + Neon(免費線上 Demo)
 
-本專案採「**單一服務**」部署:後端 Express 同時托管前端 build 產物,對外只有一個網址、免處理 CORS;再外接一個代管 PostgreSQL。
+採「**單一服務**」部署:後端 Express 同時托管前端 build 產物,對外只有一個網址、免處理 CORS;資料庫用 **Neon**(免費、不過期)的代管 PostgreSQL。
 
 ```
-使用者 → [Zeabur 服務:Express 吐前端頁面 + 提供 /api] → [Zeabur PostgreSQL]
+使用者 → [Render Web Service:Express 吐前端頁面 + 提供 /api] → [Neon PostgreSQL]
 ```
 
-## 一、先把程式碼推上 GitHub
+> 為什麼這樣配:Render 免費的 **Web Service 網域不會過期**(僅閒置會休眠);而 Render 免費的 Postgres 會過期,所以資料庫改用 **Neon**(免費且不過期)。
+
+## 一、把程式碼推上 GitHub
 
 ```bash
 cd /Users/jane/Desktop/jp_word
-git init
 git add -A
-git commit -m "feat: 日文單字射擊遊戲 (泡泡 + 口說模式)"
-# 到 GitHub 建一個空 repo(例如 jp-word),再:
-git remote add origin https://github.com/<你的帳號>/jp-word.git
-git branch -M main
-git push -u origin main
+git commit -m "日文單字射擊遊戲"
+git push
 ```
 
-> `.env`、`node_modules`、`dist` 已被 `.gitignore` 排除,不會被推上去(密碼安全)。
+> `.env`、`node_modules`、`dist` 已被 `.gitignore` 排除,不會外洩密碼。`.env.example` 是無密碼的範本,可以放心留著。
 
-## 二、在 Zeabur 建立專案
+## 二、建立 Neon 資料庫(免費、不過期)
 
-1. 到 <https://zeabur.com> 用 GitHub 登入,**New Project**。
-2. **Add Service → Git**,選你剛推的 `jp-word` repo。
-3. 再 **Add Service → Marketplace → PostgreSQL**,建立一個資料庫服務。
+1. 到 <https://neon.tech> 用 GitHub 登入 → **Create project**
+2. 複製它的 **Connection string**,格式類似:
+   ```
+   postgresql://使用者:密碼@ep-xxxx.ap-southeast-1.aws.neon.tech/dbname?sslmode=require
+   ```
 
-## 三、設定 App 服務
+## 三、建立 Render Web Service
 
-在 App 服務的 **Settings** 設定指令(Zeabur 會自動用 pnpm 安裝):
+1. 到 <https://render.com> 用 GitHub 登入 → **New + → Web Service** → 選 `jp_word` repo
+2. 設定:
 
-| 項目 | 值 |
-|------|-----|
-| Build Command | `pnpm build:deploy` |
-| Start Command | `pnpm start` |
+   | 欄位 | 值 |
+   |------|-----|
+   | Region | Singapore(離台灣近) |
+   | Build Command | `pnpm install --no-frozen-lockfile && pnpm build:deploy` |
+   | Start Command | `pnpm start` |
+   | Instance Type | **Free** |
 
-### 環境變數(Variables)
+### 環境變數(Environment)
 
 | 變數 | 值 | 說明 |
 |------|-----|------|
 | `NODE_ENV` | `production` | 讓後端托管前端頁面 |
 | `AUTO_SEED` | `true` | 首次啟動若資料庫空的就自動灌 142 筆單字 |
 | `DB_SYNCHRONIZE` | `true` | 自動建立資料表(Demo 用;正式專案改用 migration) |
-| `DATABASE_URL` | `${POSTGRES_CONNECTION_STRING}` | 綁定上面的 PostgreSQL 服務(用 Zeabur 變數參照) |
+| `DB_SSL` | `true` | Neon 需要 SSL |
+| `DATABASE_URL` | Neon 的連線字串 | 上一步複製的那一串 |
 
-> - `PORT` 不用設,Zeabur 會自動注入,程式會讀取。
-> - Zeabur 內網 Postgres 免 SSL,不用設 `DB_SSL`。
->   (若改用 Neon 等外部 Postgres,需加 `DB_SSL=true`。)
+> `PORT` 不用設,Render 會自動注入,程式會讀取。
 
-## 四、開啟網域
+## 四、部署並開啟
 
-App 服務 → **Networking / Domains** → **Generate Domain**,取得一個 `xxx.zeabur.app` 網址,打開就是你的線上 Demo 🎉
+存檔後 Render 會自動部署。成功後 Logs 會出現:
 
-首次啟動流程會自動:建立資料表 → 灌種子 → 提供前端頁面與 API。
+```
+✅ 資料庫連線成功
+🌱 資料庫是空的,開始自動灌種子…
+✅ 已建立 14 個分類、142 個單字
+🚀 後端服務啟動…
+```
+
+打開 Render 給的 `https://xxx.onrender.com` 網址就是你的線上 Demo 🎉,把網址丟給朋友即可。
+
+## 免費方案須知
+
+- ✅ `onrender.com` 網域**不會過期**;Neon 資料庫也**不會過期**
+- ⚠️ 免費 Web Service **閒置 15 分鐘會休眠**,下次有人開會**冷啟動約 30–50 秒**才回應(不是壞掉,等一下就好)
 
 ## 疑難排解
 
-- **打開是空白 / 404**:確認 `NODE_ENV=production`(否則後端不會托管前端),且 Build Command 有跑 `pnpm build:deploy` 產生 `apps/web/dist`。
-- **資料是空的**:確認 `AUTO_SEED=true` 與 `DB_SYNCHRONIZE=true`,並已正確綁定 `DATABASE_URL`。
-- **口說挑戰沒反應**:語音辨識需 HTTPS(Zeabur 網域本身是 HTTPS,沒問題)、且用 Chrome/Edge/Safari 並允許麥克風。
-- **連不到資料庫**:檢查 `DATABASE_URL` 是否正確參照到 PostgreSQL 服務。
+- **build 失敗 `ERR_PNPM_OUTDATED_LOCKFILE`**:Build Command 要加 `--no-frozen-lockfile`(見上)。
+  或在本機 `pnpm install` 更新 `pnpm-lock.yaml` 後 commit/push,之後就能用 `pnpm install && pnpm build:deploy`。
+- **打開是空白 / 404**:確認 `NODE_ENV=production`(否則後端不托管前端),且 Build Command 有跑 `pnpm build:deploy` 產生 `apps/web/dist`。
+- **連不到資料庫**:確認 `DATABASE_URL` 正確、`DB_SSL=true`;必要時改用 Neon 的完整連線字串(含 `?sslmode=require`)。
+- **資料是空的**:確認 `AUTO_SEED=true` 與 `DB_SYNCHRONIZE=true`。
+- **口說挑戰沒反應**:語音辨識需 HTTPS(`onrender.com` 本身是 HTTPS,沒問題),用 Chrome/Edge/Safari 並允許麥克風。
+
+## 更新網站
+
+之後改了程式,只要 `git push`,Render 會自動重新部署。
 
 ## 本機測試 production 模式
 
 ```bash
-pnpm --filter @jp-word/web build          # 先產生前端 dist
-PORT=3009 NODE_ENV=production pnpm start   # 後端托管前端 + API
+pnpm --filter @jp-word/web build            # 先產生前端 dist
+PORT=3009 NODE_ENV=production pnpm start     # 後端托管前端 + API(連本機或雲端 DB)
 # 打開 http://localhost:3009
 ```
