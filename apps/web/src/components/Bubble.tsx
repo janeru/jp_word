@@ -1,39 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
-import type { AnimationEvent, MouseEvent } from 'react';
+import { useEffect, useRef } from 'react';
+import type { MouseEvent } from 'react';
 import type { FallingBubble } from '../game/types.ts';
 import { displayLabel } from '../game/engine.ts';
 import { playAlert } from '../audio/sound.ts';
 
 interface BubbleProps {
   bubble: FallingBubble;
+  /** 目前的垂直位置(px,由 PlayField 的時鐘計算) */
+  y: number;
+  /** 直徑(px) */
+  size: number;
+  /** 是否快落地(示警) */
+  danger: boolean;
   onPick: (wordId: number, e: MouseEvent<HTMLButtonElement>) => void;
-  onLand: (wordId: number) => void;
 }
 
-/** 泡泡進入「危險」狀態的時間點(佔落下時間的比例) */
-const DANGER_AT = 0.72;
-
-/** 一顆從上方落下的日文假名泡泡;快落地時轉紅示警,點擊作答,落地觸發 onLand */
-export function Bubble({ bubble, onPick, onLand }: BubbleProps) {
-  const [danger, setDanger] = useState(false);
+/** 一顆日文假名泡泡;位置與落地都由外部的遊戲時鐘控制,自己只負責顯示與點擊 */
+export function Bubble({ bubble, y, size, danger, onPick }: BubbleProps) {
   const alerted = useRef(false);
 
-  // 快落地時進入危險狀態並發出心跳示警(只觸發一次)
+  // 進入危險狀態時發出一次心跳示警
   useEffect(() => {
-    const dangerDelay = bubble.startDelayMs + bubble.fallMs * DANGER_AT;
-    const t = window.setTimeout(() => {
-      setDanger(true);
-      if (!alerted.current) {
-        alerted.current = true;
-        playAlert();
-      }
-    }, dangerDelay);
-    return () => window.clearTimeout(t);
-  }, [bubble.startDelayMs, bubble.fallMs]);
-
-  const handleAnimationEnd = (e: AnimationEvent<HTMLButtonElement>) => {
-    if (e.animationName === 'fall') onLand(bubble.word.id);
-  };
+    if (danger && !alerted.current) {
+      alerted.current = true;
+      playAlert();
+    }
+  }, [danger]);
 
   return (
     <button
@@ -41,11 +33,11 @@ export function Bubble({ bubble, onPick, onLand }: BubbleProps) {
       className={`bubble ${danger ? 'danger' : ''}`}
       style={{
         left: `${bubble.xPercent}%`,
-        animationDuration: `${bubble.fallMs}ms`,
-        animationDelay: `${bubble.startDelayMs}ms`,
+        width: size,
+        height: size,
+        transform: `translateY(${y}px)`,
       }}
       onClick={(e) => onPick(bubble.word.id, e)}
-      onAnimationEnd={handleAnimationEnd}
     >
       {displayLabel(bubble.word)}
     </button>

@@ -142,9 +142,10 @@ export function App() {
     );
   }
 
-  // phase.name === 'result'
-  const index = categories.findIndex((c) => c.slug === phase.category.slug);
-  const nextCategory = categories[index + 1] ?? null;
+  // phase.name === 'result':下一關 = 同一個世界(group)裡的下一關,兩個世界獨立
+  const groupCats = categories.filter((c) => c.group === phase.category.group);
+  const gi = groupCats.findIndex((c) => c.slug === phase.category.slug);
+  const nextCategory = groupCats[gi + 1] ?? null;
 
   return (
     <ResultScreen

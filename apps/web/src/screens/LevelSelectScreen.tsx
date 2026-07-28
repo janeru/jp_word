@@ -18,6 +18,20 @@ const GROUP_LABEL: Record<CategoryGroup, string> = {
   travel: '旅遊實用',
 };
 
+/** 依關卡數量,算出一條「蛇形蜿蜒」路線上每一站的位置(百分比座標) */
+function serpentinePoints(count: number): { x: number; y: number }[] {
+  const cols = Math.min(4, count);
+  const rows = Math.ceil(count / cols);
+  return Array.from({ length: count }, (_, i) => {
+    const r = Math.floor(i / cols);
+    const p = i % cols;
+    const c = r % 2 === 0 ? p : cols - 1 - p; // 奇數列反向 → 蛇形
+    const x = cols === 1 ? 50 : 12 + c * (76 / (cols - 1));
+    const y = rows === 1 ? 50 : 14 + r * (72 / (rows - 1));
+    return { x, y };
+  });
+}
+
 /** 關卡選擇畫面:依群組列出所有關卡,顯示解鎖狀態與最佳成績 */
 export function LevelSelectScreen({
   categories,
@@ -26,10 +40,15 @@ export function LevelSelectScreen({
   onSelect,
   onOpenLeaderboard,
 }: Props) {
-  const orderedSlugs = categories.map((c) => c.slug);
   const records = getAllRecords();
   const groups: CategoryGroup[] = ['basic', 'travel'];
   const [name, setName] = useState(getPlayerName());
+  const [selectedWorld, setSelectedWorld] = useState<CategoryGroup>('basic');
+
+  // WORLD 2 需破完 WORLD 1 全部關卡才解鎖
+  const basicCats = categories.filter((c) => c.group === 'basic');
+  const basicAllCleared =
+    basicCats.length > 0 && basicCats.every((c) => records[c.slug]?.cleared);
 
   const handleNameChange = (value: string) => {
     setName(value);
@@ -82,49 +101,67 @@ export function LevelSelectScreen({
         </p>
       </header>
 
-      {groups.map((group) => {
-        const inGroup = categories.filter((c) => c.group === group);
-        if (inGroup.length === 0) return null;
+      {/* 世界分頁:點擊切換,WORLD 2 需破完 WORLD 1 才解鎖 */}
+      <div className="world-tabs">
+        {groups.map((g, i) => {
+          const locked = g === 'travel' && !basicAllCleared;
+          return (
+            <button
+              key={g}
+              type="button"
+              className={`world-tab ${selectedWorld === g ? 'active' : ''} ${locked ? 'locked' : ''}`}
+              disabled={locked}
+              onClick={() => setSelectedWorld(g)}
+            >
+              {locked ? '🔒 ' : ''}
+              WORLD {i + 1}・{GROUP_LABEL[g]}
+            </button>
+          );
+        })}
+      </div>
+      {!basicAllCleared && (
+        <p className="world-locked-hint">破完 WORLD 1 全部關卡即可解鎖 WORLD 2 🔓</p>
+      )}
+
+      {(() => {
+        const inGroup = categories.filter((c) => c.group === selectedWorld);
+        // 各世界內以自己的順序循序解鎖(第 1 關開放,過一關解鎖下一關)
+        const groupSlugs = inGroup.map((c) => c.slug);
+        const points = serpentinePoints(inGroup.length);
+        const rows = Math.ceil(inGroup.length / Math.min(4, inGroup.length));
         return (
-          <section key={group} className="level-group">
-            <h2 className="group-title">{GROUP_LABEL[group]}</h2>
-            <div className="level-grid">
-              {inGroup.map((cat) => {
-                const globalIndex = orderedSlugs.indexOf(cat.slug);
-                const unlocked = isUnlocked(orderedSlugs, cat.slug);
+          <section className="world">
+            <div className="world-map" style={{ minHeight: rows * 150 }}>
+              {/* 蜿蜒的虛線小徑 */}
+              <svg className="map-path" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <polyline points={points.map((p) => `${p.x},${p.y}`).join(' ')} />
+              </svg>
+
+              {inGroup.map((cat, i) => {
+                const unlocked = isUnlocked(groupSlugs, cat.slug);
                 const record = records[cat.slug];
+                const state = !unlocked ? 'locked' : record?.cleared ? 'cleared' : 'current';
                 return (
                   <button
                     key={cat.slug}
                     type="button"
-                    className={`level-card ${unlocked ? '' : 'locked'} ${
-                      record?.cleared ? 'cleared' : ''
-                    }`}
+                    className={`map-node ${state}`}
+                    style={{ left: `${points[i].x}%`, top: `${points[i].y}%` }}
                     disabled={!unlocked}
                     onClick={() => onSelect(cat)}
                   >
-                    <span className="level-no">關卡 {globalIndex + 1}</span>
-                    <span className="level-name-ja">{cat.nameJa}</span>
-                    <span className="level-name-zh">{cat.nameZh}</span>
-                    {unlocked ? (
-                      record?.cleared ? (
-                        <>
-                          <StarRating full={record.bestStars} size={18} />
-                          <span className="level-best">最佳 {record.bestScore} 分</span>
-                        </>
-                      ) : (
-                        <span className="level-hint">尚未挑戰</span>
-                      )
-                    ) : (
-                      <span className="level-lock">🔒 未解鎖</span>
-                    )}
+                    <span className="node-medallion">{state === 'locked' ? '🔒' : i + 1}</span>
+                    <span className="node-tag">
+                      {cat.nameZh}
+                      {state === 'cleared' && <StarRating full={record!.bestStars} size={12} />}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </section>
         );
-      })}
+      })()}
     </div>
   );
 }

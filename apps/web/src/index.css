@@ -161,82 +161,197 @@ button {
   box-shadow: none;
 }
 
-.level-group {
-  margin-top: 1.8rem;
-}
-
-.group-title {
-  font-size: 1.1rem;
-  color: #fff;
-  text-shadow: 2px 2px 0 var(--ink);
-  border-left: 6px solid var(--coin);
-  padding-left: 0.6rem;
-  margin-bottom: 1rem;
-}
-
-.level-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.level-card {
+/* ---- 世界分頁 ---- */
+.world-tabs {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 1.1rem 0.75rem;
+  gap: 0.4rem;
+  margin-top: 1.6rem;
+}
+
+.world-tab {
+  flex: 1;
+  padding: 0.65rem 0.6rem;
+  border: 4px solid var(--ink);
+  border-radius: 0;
+  background: var(--cream-2);
   color: var(--ink);
-  box-shadow: 0 6px 0 var(--ink);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  font-family: var(--pixel);
+  font-size: 0.66rem;
+  font-weight: 800;
+  box-shadow: 0 4px 0 var(--ink);
 }
 
-.level-card:not(.locked):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 0 var(--ink);
-}
-
-.level-card:not(.locked):active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 var(--ink);
-}
-
-.level-card.cleared {
+.world-tab.active {
   background: var(--coin);
 }
 
-.level-card.locked {
+.world-tab:not(.locked):active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.world-tab.locked {
   background: #b9b29a;
   color: #6a6350;
   cursor: not-allowed;
-  box-shadow: 0 6px 0 #5a5443;
+  box-shadow: 0 4px 0 #5a5443;
 }
 
-.level-no {
-  font-size: 0.6rem;
-  color: var(--brick-dark);
+.world-locked-hint {
+  color: var(--ink);
+  background: rgba(253, 243, 215, 0.85);
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  margin: 0.5rem 0 0;
 }
 
-.level-name-ja {
-  font-size: 1.35rem;
+/* ---- 世界地圖式關卡 ---- */
+.world {
+  margin-top: 0.8rem;
+  border: 4px solid var(--ink);
+  border-radius: 0;
+  background: linear-gradient(180deg, #6ba7ff 0%, #a9d6ff 100%);
+  box-shadow: 0 6px 0 var(--ink);
+  overflow: hidden;
+}
+
+.world-banner {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+}
+
+.world-no {
+  font-family: var(--pixel);
+  font-size: 0.8rem;
+  color: var(--coin);
+}
+
+.world-name {
   font-weight: 800;
+  font-size: 1.05rem;
 }
 
-.level-name-zh {
-  font-size: 0.9rem;
-  color: var(--brick-dark);
+/* 一條由左而右的關卡路線 */
+/* 世界地圖畫布:蜿蜒路線 + 以百分比定位的關卡站 */
+.world-map {
+  position: relative;
+  padding: 0.5rem;
 }
 
-.level-best {
-  font-size: 0.7rem;
-  color: var(--brick-dark);
-  font-weight: 700;
+/* 蜿蜒的虛線小徑 */
+.map-path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.level-hint,
-.level-lock {
-  font-size: 0.75rem;
-  color: var(--brick-dark);
+.map-path polyline {
+  fill: none;
+  stroke: rgba(43, 30, 16, 0.5);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 7 7;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 路線上的關卡站(用 left/top 百分比定位,translate 置中) */
+.map-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 92px;
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  z-index: 1;
+}
+
+.map-node:disabled {
+  cursor: not-allowed;
+}
+
+/* 關卡編號獎章 */
+.node-medallion {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  box-shadow: 0 5px 0 var(--ink);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.map-node.cleared .node-medallion {
+  background: var(--coin);
+}
+
+.map-node.current .node-medallion {
+  background: var(--red);
+  color: #fff;
+  animation: bob 0.7s steps(2) infinite;
+}
+
+.map-node.locked .node-medallion {
+  background: #b9b29a;
+  color: #6a6350;
+  box-shadow: 0 5px 0 #5a5443;
+  font-size: 1.2rem;
+}
+
+.map-node:not(.locked):hover .node-medallion {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 var(--ink);
+}
+
+.map-node:not(.locked):active .node-medallion {
+  transform: translateY(5px);
+  box-shadow: none;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 站點名牌 */
+.node-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.map-node.locked .node-tag {
+  background: #cfc9b5;
+  color: #6a6350;
 }
 
 /* ---- 模式切換 ---- */
@@ -344,9 +459,7 @@ button {
 
 /* ---- 落下場地(天空 + 磚塊地面)---- */
 .bubble-field {
-  --area-h: 560px;
   position: relative;
-  height: var(--area-h);
   margin-top: 0.5rem;
   overflow: hidden;
   border: 4px solid var(--ink);
@@ -374,11 +487,8 @@ button {
 }
 
 .bubble {
-  --bubble-size: 84px;
   position: absolute;
   top: 0;
-  width: var(--bubble-size);
-  height: var(--bubble-size);
   border: 4px solid var(--ink);
   border-radius: 50%;
   font-size: 1.4rem;
@@ -387,9 +497,6 @@ button {
   /* 復古金幣/泡泡:硬光澤 */
   background: radial-gradient(circle at 34% 30%, #fff 0 18%, var(--coin) 19% 100%);
   box-shadow: 0 4px 0 var(--coin-dark), inset -4px -6px 0 rgba(0, 0, 0, 0.15);
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
   transition: filter 0.1s ease;
   image-rendering: pixelated;
 }
@@ -426,14 +533,54 @@ button {
   }
 }
 
-/* 從場地上方等速落到地面(依 CSS 變數計算,才能隨螢幕縮放) */
-@keyframes fall {
-  from {
-    transform: translateY(calc(-1 * var(--bubble-size)));
-  }
-  to {
-    transform: translateY(calc(var(--area-h) - var(--bubble-size)));
-  }
+/* 蘋果道具:掉落,點到可延長時間 */
+.apple {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3));
+}
+
+.apple:hover {
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3)) brightness(1.15);
+}
+
+/* 慢動作(吃到蘋果 / 連擊獎勵):藍色微光 + 泡泡光暈 */
+.bubble-field.slow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(150, 200, 255, 0.18);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.bubble-field.slow .bubble {
+  filter: drop-shadow(0 0 7px #bfe6ff);
+}
+
+.slow-banner {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: var(--blue-dark);
+  color: #fff;
+  font-family: var(--pixel);
+  font-size: 0.8rem;
+  padding: 0.5rem 0.9rem;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 0 var(--ink);
+  pointer-events: none;
+  animation: bob 0.5s steps(2) infinite;
 }
 
 /* 命中擴散環(方形像素感) */
@@ -796,12 +943,7 @@ button {
     font-size: 1.7rem;
   }
 
-  .bubble-field {
-    --area-h: 440px;
-  }
-
   .bubble {
-    --bubble-size: 58px;
     font-size: 0.95rem;
   }
 
@@ -828,13 +970,18 @@ button {
     font-size: 0.85rem;
   }
 
-  .level-grid {
-    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-    gap: 0.7rem;
+  .map-node {
+    width: 74px;
   }
 
-  .level-name-ja {
-    font-size: 1.2rem;
+  .node-medallion {
+    width: 50px;
+    height: 50px;
+    font-size: 0.8rem;
+  }
+
+  .node-tag {
+    font-size: 0.66rem;
   }
 
   .result-score {
