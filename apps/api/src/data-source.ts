@@ -1,16 +1,40 @@
 import 'reflect-metadata';
+import pg from 'pg';
 import { DataSource, type DataSourceOptions } from 'typeorm';
 import { env } from './env.js';
 import { WordEntity } from './entities/Word.js';
 import { ScoreEntity } from './entities/Score.js';
 import { CategoryEntity } from './entities/Category.js';
+import { UserEntity } from './entities/User.js';
+import { RoleEntity } from './entities/Role.js';
+import { PermissionEntity } from './entities/Permission.js';
+import { UserRoleEntity } from './entities/UserRole.js';
+import { RolePermissionEntity } from './entities/RolePermission.js';
+
+// `timestamp`(不帶時區)欄位一律當 UTC 解析。
+// 這類欄位由 Postgres 的 now() 以 UTC 寫入(如 scores.createdAt),
+// 但 pg 預設會用 Node 的本機時區解讀,本機在台灣就會早 8 小時。
+// 不改成 timestamptz 是因為 synchronize 可能刪掉欄位重建,舊資料的時間會遺失。
+pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (value) =>
+  new Date(`${value.replace(' ', 'T')}Z`),
+);
 
 // 共用設定:Entity 註冊、migration 路徑、schema 同步。
 const base = {
   type: 'postgres' as const,
   synchronize: env.db.synchronize,
   logging: false,
-  entities: [WordEntity, ScoreEntity, CategoryEntity],
+  entities: [
+    WordEntity,
+    ScoreEntity,
+    CategoryEntity,
+    // RBAC:使用者、角色、權限,與兩張多對多中介表
+    UserEntity,
+    RoleEntity,
+    PermissionEntity,
+    UserRoleEntity,
+    RolePermissionEntity,
+  ],
   migrations: ['src/migrations/*.ts'],
   // 代管 Postgres 常需要 SSL;自簽憑證用 rejectUnauthorized:false 放行。
   ssl: env.db.ssl ? { rejectUnauthorized: false } : false,

@@ -7,6 +7,17 @@ interface Props {
   onBack: () => void;
 }
 
+/** 成績達成時間,依使用者瀏覽器時區顯示,例:2026/11/17 14:05 */
+const formatTime = (iso: string) =>
+  new Date(iso).toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
 /** 排行榜畫面:顯示後端記錄的最高分成績 */
 export function LeaderboardScreen({ categories, onBack }: Props) {
   const [scores, setScores] = useState<ScoreEntry[]>([]);
@@ -44,7 +55,12 @@ export function LeaderboardScreen({ categories, onBack }: Props) {
           {scores.map((s, i) => (
             <li key={s.id} className={`lb-row ${i < 3 ? 'top' : ''}`}>
               <span className="lb-rank">{i + 1}</span>
-              <span className="lb-name">{s.playerName}</span>
+              <span className="lb-name">
+                {s.playerName}
+                <time className="lb-time" dateTime={s.createdAt}>
+                  {formatTime(s.createdAt)}
+                </time>
+              </span>
               <span className="lb-cat">{nameOf(s.categorySlug)}</span>
               <span className="lb-score">{s.score} 分</span>
             </li>

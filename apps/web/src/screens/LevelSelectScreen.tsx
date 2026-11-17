@@ -3,7 +3,8 @@ import type { Category, CategoryGroup } from '@jp-word/shared';
 import type { GameMode } from '../App.tsx';
 import { StarRating } from '../components/StarRating.tsx';
 import { SoundToggle } from '../components/SoundToggle.tsx';
-import { getAllRecords, getPlayerName, isUnlocked, setPlayerName } from '../progress/storage.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
+import { getAllRecords, isUnlocked } from '../progress/storage.ts';
 
 interface Props {
   categories: Category[];
@@ -42,7 +43,7 @@ export function LevelSelectScreen({
 }: Props) {
   const records = getAllRecords();
   const groups: CategoryGroup[] = ['basic', 'travel'];
-  const [name, setName] = useState(getPlayerName());
+  const { user, logout, can } = useAuth();
   const [selectedWorld, setSelectedWorld] = useState<CategoryGroup>('basic');
 
   // WORLD 2 需破完 WORLD 1 全部關卡才解鎖
@@ -50,28 +51,21 @@ export function LevelSelectScreen({
   const basicAllCleared =
     basicCats.length > 0 && basicCats.every((c) => records[c.slug]?.cleared);
 
-  const handleNameChange = (value: string) => {
-    setName(value);
-    setPlayerName(value);
-  };
-
   return (
     <div className="screen">
       <header className="app-header">
         <div className="header-row">
           <h1>🎯 日文單字射擊遊戲</h1>
           <div className="header-controls">
-            <label className="name-field">
-              暱稱
-              <input
-                value={name}
-                maxLength={20}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="玩家"
-              />
-            </label>
-            <button type="button" className="btn-secondary" onClick={onOpenLeaderboard}>
-              🏆 排行榜
+            {/* 名稱來自登入帳號,不再由玩家自行填寫 */}
+            <span className="user-chip">👤 {user?.name}</span>
+            {can('Game_Leaderboard_Search') && (
+              <button type="button" className="btn-secondary" onClick={onOpenLeaderboard}>
+                🏆 排行榜
+              </button>
+            )}
+            <button type="button" className="btn-secondary" onClick={() => void logout()}>
+              登出
             </button>
             <SoundToggle />
           </div>
