@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express, { type Express } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { env } from './env.js';
 import type { Container } from './container.js';
 import { createApiRouter } from './routes/index.js';
@@ -14,8 +15,12 @@ import { errorHandler } from './http/errorHandler.js';
 export function createApp(container: Container): Express {
   const app = express();
 
-  app.use(cors({ origin: env.webOrigin }));
+  // credentials: true 才會讓瀏覽器帶上 httpOnly cookie;
+  // 搭配明確的 origin(不能用 *),否則瀏覽器會拒絕。
+  app.use(cors({ origin: env.webOrigin, credentials: true }));
   app.use(express.json());
+  // 解析 cookie,驗證中介層才讀得到存放 token 的 httpOnly cookie
+  app.use(cookieParser());
 
   app.use('/api', createApiRouter(container));
 

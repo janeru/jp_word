@@ -1,8 +1,12 @@
 import type { DataSource, Repository } from 'typeorm';
 import { ScoreEntity } from '../entities/Score.js';
 
-/** 建立成績時需要的資料(不含自動產生的 id/createdAt) */
-export type NewScore = Omit<ScoreEntity, 'id' | 'createdAt'>;
+/**
+ * 建立成績時需要的資料。
+ * 排除自動產生的 id/createdAt,以及 user 這個關聯物件 —
+ * 寫入時只給外鍵 userId 就夠了。
+ */
+export type NewScore = Omit<ScoreEntity, 'id' | 'createdAt' | 'user'>;
 
 /** 成績資料存取介面(Repository Pattern) */
 export interface IScoreRepository {

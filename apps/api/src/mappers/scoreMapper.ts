@@ -5,6 +5,7 @@ import type { ScoreEntity } from '../entities/Score.js';
 export function toScoreDto(entity: ScoreEntity): ScoreEntry {
   return {
     id: entity.id,
+    userId: entity.userId,
     playerName: entity.playerName,
     score: entity.score,
     hits: entity.hits,

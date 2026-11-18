@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Category, Word } from '@jp-word/shared';
 import { fetchCategories, fetchWordsByCategory, submitScore } from './api.ts';
 import type { GameOutcome } from './game/types.ts';
-import { getPlayerName, getRecord, recordResult } from './progress/storage.ts';
+import { getRecord, recordResult } from './progress/storage.ts';
+import { useAuth } from './auth/AuthContext.tsx';
+import { LoginScreen } from './screens/LoginScreen.tsx';
 import { LevelSelectScreen } from './screens/LevelSelectScreen.tsx';
 import { GameScreen } from './screens/GameScreen.tsx';
 import { SpeakGameScreen } from './screens/SpeakGameScreen.tsx';
@@ -28,6 +30,9 @@ type Phase =
   | { name: 'leaderboard' };
 
 export function App() {
+  const { user, guest, loading: authLoading, leaveGuest } = useAuth();
+  // 登入者或訪客都能進遊戲;訪客只差在成績不上傳
+  const canEnter = user !== null || guest;
   const [categories, setCategories] = useState<Category[]>([]);
   const [mode, setMode] = useState<GameMode>('bubble');
   const [phase, setPhase] = useState<Phase>({ name: 'loading' });
@@ -39,7 +44,10 @@ export function App() {
     return () => window.removeEventListener('pointerdown', initAudioOnGesture);
   }, []);
 
+  // 還在登入畫面時不抓資料;進入遊戲(登入或訪客)才載入分類
   useEffect(() => {
+    if (!canEnter) return;
+    setPhase({ name: 'loading' });
     fetchCategories()
       .then((cats) => {
         setCategories(cats);
@@ -48,7 +56,7 @@ export function App() {
       .catch((err: unknown) => {
         setPhase({ name: 'error', message: err instanceof Error ? err.message : String(err) });
       });
-  }, []);
+  }, [canEnter]);
 
   // 進入某關卡(依指定模式):抓該分類單字並開始遊戲
   const launch = useCallback(async (category: Category, gameMode: GameMode) => {
@@ -82,8 +90,8 @@ export function App() {
           cleared: true,
         });
 
-        submitScore({
-          playerName: getPlayerName(),
+        // 玩家名稱由後端從登入身分帶入,前端不提供;訪客不上傳(後端也會擋)
+        if (user) submitScore({
           score: outcome.score,
           hits: outcome.matched,
           misses: outcome.wrong,
@@ -96,8 +104,18 @@ export function App() {
 
       setPhase({ name: 'result', category, mode: gameMode, outcome, isNewBest });
     },
-    [],
+    [user],
   );
+
+  // 啟動時先向後端確認 cookie 是否仍有效
+  if (authLoading) {
+    return <div className="screen center">確認登入狀態…</div>;
+  }
+
+  // 未登入且沒選訪客模式 → 登入畫面
+  if (!canEnter) {
+    return <LoginScreen />;
+  }
 
   if (phase.name === 'loading') {
     return <div className="screen center">載入中…</div>;
@@ -152,6 +170,8 @@ export function App() {
       category={phase.category}
       outcome={phase.outcome}
       isNewBest={phase.isNewBest}
+      isGuest={!user}
+      onSignUp={leaveGuest}
       hasNext={nextCategory !== null}
       onRetry={() => launch(phase.category, phase.mode)}
       onNext={() => nextCategory && launch(nextCategory, phase.mode)}

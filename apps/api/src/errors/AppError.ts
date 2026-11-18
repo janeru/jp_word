@@ -18,7 +18,22 @@ export class ValidationError extends AppError {
   readonly statusCode = 400;
 }
 
+/** 401:未登入,或 token 無效/過期 */
+export class UnauthorizedError extends AppError {
+  readonly statusCode = 401;
+}
+
+/** 403:已登入,但權限不足 */
+export class ForbiddenError extends AppError {
+  readonly statusCode = 403;
+}
+
 /** 404:找不到資源 */
 export class NotFoundError extends AppError {
   readonly statusCode = 404;
+}
+
+/** 409:與現有資料衝突(例如 email 已被註冊) */
+export class ConflictError extends AppError {
+  readonly statusCode = 409;
 }

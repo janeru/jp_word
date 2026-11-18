@@ -1,5 +1,8 @@
 // 前後端共用的型別與常數。前端與後端都從 `@jp-word/shared` 匯入,避免重複定義。
 
+// 認證與權限(RBAC)相關型別
+export * from './auth.js';
+
 /** JLPT 等級,用來標記單字難度 */
 export type JlptLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
@@ -71,7 +74,10 @@ export interface GameResult {
 /** 排行榜上的一筆紀錄 */
 export interface ScoreEntry extends GameResult {
   id: number;
+  /** 顯示用的玩家名稱,由後端從登入者身上帶出(前端無法自填) */
   playerName: string;
+  /** 成績所屬的使用者;舊資料可能為 null */
+  userId: number | null;
   createdAt: string; // ISO 8601
 }
 
@@ -85,9 +91,20 @@ export interface GetWordsQuery {
   limit?: number;
 }
 
-/** POST /api/scores 的請求 body */
-export interface CreateScoreRequest extends GameResult {
-  playerName: string;
+/**
+ * POST /api/scores 的請求 body。
+ * 玩家名稱不由前端提供 — 後端一律從登入身分(JWT)取得,避免冒名。
+ */
+export type CreateScoreRequest = GameResult;
+
+/** GET /api/scores/me/rank 的回應:目前登入者在總排行榜上的名次 */
+export interface MyRank {
+  /** 名次(1 起算);還沒有成績時為 null */
+  rank: number | null;
+  /** 個人最高分;還沒有成績時為 null */
+  bestScore: number | null;
+  /** 榜上總人數 */
+  totalPlayers: number | null;
 }
 
 /** 統一的 API 回應包裝 */

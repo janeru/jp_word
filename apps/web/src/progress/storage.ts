@@ -1,21 +1,11 @@
-// 關卡進度儲存於瀏覽器 localStorage(免登入)。
+// 關卡進度儲存於瀏覽器 localStorage。
 // 記錄「已解鎖到第幾關」與「每關最佳成績」。
+//
+// 注意:進度綁在「這台瀏覽器」而非帳號 — 換裝置或清快取會歸零,
+// 同一台機器換帳號登入看到的也是同一份進度。
+// 玩家名稱則相反,已改由登入帳號決定(見 auth/AuthContext.tsx)。
 
 const STORAGE_KEY = 'jp-word-progress-v1';
-const PLAYER_KEY = 'jp-word-player';
-const DEFAULT_PLAYER = '玩家';
-
-/** 取得玩家暱稱(沒設定過回預設值) */
-export function getPlayerName(): string {
-  return localStorage.getItem(PLAYER_KEY)?.trim() || DEFAULT_PLAYER;
-}
-
-/** 設定玩家暱稱(空字串則回復預設) */
-export function setPlayerName(name: string): void {
-  const trimmed = name.trim().slice(0, 20);
-  if (trimmed) localStorage.setItem(PLAYER_KEY, trimmed);
-  else localStorage.removeItem(PLAYER_KEY);
-}
 
 /** 單一關卡的最佳成績 */
 export interface LevelRecord {
