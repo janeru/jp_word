@@ -6,7 +6,7 @@ type Tab = 'login' | 'register';
 
 /** 登入 / 註冊畫面。未登入時取代整個遊戲畫面。 */
 export function LoginScreen() {
-  const { login, register } = useAuth();
+  const { login, register, enterGuest } = useAuth();
   const [tab, setTab] = useState<Tab>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -109,7 +109,10 @@ export function LoginScreen() {
         </form>
       </div>
 
-      <p className="subtitle">登入後才能遊玩與上傳成績</p>
+      <button type="button" className="btn-ghost" onClick={enterGuest}>
+        先以訪客身分玩 →
+      </button>
+      <p className="subtitle">訪客也能玩,但要登入後成績才會登上排行榜</p>
     </div>
   );
 }

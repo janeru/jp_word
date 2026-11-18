@@ -124,6 +124,17 @@ export const DEFAULT_ROLES: RoleSeed[] = [
   },
 ];
 
+/**
+ * 訪客(未登入)擁有的權限。
+ * 定義在程式碼而非資料庫:訪客沒有帳號可掛角色,也不該讓管理員從後台放寬。
+ * 刻意不含 Game_Play —— 上傳成績必須登入,排行榜名字才無法冒用。
+ */
+export const GUEST_PERMISSIONS: readonly PermissionCode[] = [
+  'Game_Leaderboard_Search',
+  'ContentManage_Word_Search',
+  'ContentManage_Category_Search',
+];
+
 // ---- 對外 DTO ----
 
 /** 一項權限 */

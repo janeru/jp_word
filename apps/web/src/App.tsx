@@ -30,7 +30,9 @@ type Phase =
   | { name: 'leaderboard' };
 
 export function App() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, guest, loading: authLoading, leaveGuest } = useAuth();
+  // 登入者或訪客都能進遊戲;訪客只差在成績不上傳
+  const canEnter = user !== null || guest;
   const [categories, setCategories] = useState<Category[]>([]);
   const [mode, setMode] = useState<GameMode>('bubble');
   const [phase, setPhase] = useState<Phase>({ name: 'loading' });
@@ -42,9 +44,9 @@ export function App() {
     return () => window.removeEventListener('pointerdown', initAudioOnGesture);
   }, []);
 
-  // 未登入時不抓資料 — 相關 API 需要權限,會直接被擋下
+  // 還在登入畫面時不抓資料;進入遊戲(登入或訪客)才載入分類
   useEffect(() => {
-    if (!user) return;
+    if (!canEnter) return;
     setPhase({ name: 'loading' });
     fetchCategories()
       .then((cats) => {
@@ -54,7 +56,7 @@ export function App() {
       .catch((err: unknown) => {
         setPhase({ name: 'error', message: err instanceof Error ? err.message : String(err) });
       });
-  }, [user]);
+  }, [canEnter]);
 
   // 進入某關卡(依指定模式):抓該分類單字並開始遊戲
   const launch = useCallback(async (category: Category, gameMode: GameMode) => {
@@ -88,8 +90,8 @@ export function App() {
           cleared: true,
         });
 
-        // 玩家名稱由後端從登入身分帶入,前端不提供
-        submitScore({
+        // 玩家名稱由後端從登入身分帶入,前端不提供;訪客不上傳(後端也會擋)
+        if (user) submitScore({
           score: outcome.score,
           hits: outcome.matched,
           misses: outcome.wrong,
@@ -102,7 +104,7 @@ export function App() {
 
       setPhase({ name: 'result', category, mode: gameMode, outcome, isNewBest });
     },
-    [],
+    [user],
   );
 
   // 啟動時先向後端確認 cookie 是否仍有效
@@ -110,8 +112,8 @@ export function App() {
     return <div className="screen center">確認登入狀態…</div>;
   }
 
-  // 未登入一律導向登入畫面(沒有訪客模式)
-  if (!user) {
+  // 未登入且沒選訪客模式 → 登入畫面
+  if (!canEnter) {
     return <LoginScreen />;
   }
 
@@ -168,6 +170,8 @@ export function App() {
       category={phase.category}
       outcome={phase.outcome}
       isNewBest={phase.isNewBest}
+      isGuest={!user}
+      onSignUp={leaveGuest}
       hasNext={nextCategory !== null}
       onRetry={() => launch(phase.category, phase.mode)}
       onNext={() => nextCategory && launch(nextCategory, phase.mode)}

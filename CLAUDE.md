@@ -79,6 +79,7 @@ pnpm --filter api leaderboard:rebuild # 從 Postgres 重建 Redis 排行榜 ZSET
 - **token 只存 httpOnly cookie**,不放回應 body,前端讀不到也不保管。前端靠 `GET /api/auth/me` 還原登入狀態,不用 localStorage 判斷。
 - **路由掛權限**:`auth.requirePermission('Xxx_Yyy_Zzz')`,見 `apps/api/src/http/authMiddleware.ts`。
 - **身分不信任前端**:成績的 `playerName` / `userId` 一律由後端從登入者帶入,忽略 request body。
+- **訪客模式**:未登入時 `requirePermission` 改以 `packages/shared` 的 `GUEST_PERMISSIONS` 判斷(查單字、查分類、看排行榜),**刻意不含 `Game_Play`** —— 訪客能玩但成績不上傳,排行榜名字才無法冒用。訪客權限寫死在程式碼,不進資料庫。
 - 關卡進度目前仍存在瀏覽器 localStorage(`apps/web/src/progress/storage.ts`),**沒有**綁帳號。
 
 第一位管理員由 `ADMIN_EMAIL` / `ADMIN_PASSWORD` 環境變數在啟動時自動建立;沒有他就沒人能進權限管理。

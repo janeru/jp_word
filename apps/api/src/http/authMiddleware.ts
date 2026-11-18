@@ -1,5 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import type { AuthUser, PermissionCode } from '@jp-word/shared';
+import { GUEST_PERMISSIONS, type AuthUser, type PermissionCode } from '@jp-word/shared';
 import { env } from '../env.js';
 import { ForbiddenError, UnauthorizedError } from '../errors/AppError.js';
 import { verifyToken } from '../auth/token.js';
@@ -60,14 +60,19 @@ export function createAuthMiddleware(authService: AuthService) {
   };
 
   /**
-   * 權限檢查:必須先登入,且具備指定權限之一。
+   * 權限檢查:具備指定權限之一才放行。
+   * 未登入時以訪客權限(GUEST_PERMISSIONS)判斷,夠用就放行、不夠才回 401 要求登入。
    * 用法:router.post('/', requirePermission('ContentManage_Word_Create'), handler)
    */
   const requirePermission =
     (...codes: PermissionCode[]): RequestHandler =>
     (req: Request, res: Response, next: NextFunction) => {
-      authenticate(req, res, (err?: unknown) => {
+      optionalAuth(req, res, (err?: unknown) => {
         if (err) return next(err);
+        if (!req.user) {
+          if (codes.some((c) => GUEST_PERMISSIONS.includes(c))) return next();
+          return next(new UnauthorizedError('請先登入'));
+        }
         const owned = req.user?.permissions ?? [];
         const allowed = codes.some((c) => owned.includes(c));
         if (!allowed) {

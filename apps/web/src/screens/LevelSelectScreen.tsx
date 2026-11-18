@@ -43,7 +43,7 @@ export function LevelSelectScreen({
 }: Props) {
   const records = getAllRecords();
   const groups: CategoryGroup[] = ['basic', 'travel'];
-  const { user, logout, can } = useAuth();
+  const { user, logout, leaveGuest, can } = useAuth();
   const [selectedWorld, setSelectedWorld] = useState<CategoryGroup>('basic');
 
   // WORLD 2 需破完 WORLD 1 全部關卡才解鎖
@@ -57,16 +57,22 @@ export function LevelSelectScreen({
         <div className="header-row">
           <h1>🎯 日文單字射擊遊戲</h1>
           <div className="header-controls">
-            {/* 名稱來自登入帳號,不再由玩家自行填寫 */}
-            <span className="user-chip">👤 {user?.name}</span>
+            {/* 名稱來自登入帳號,不再由玩家自行填寫;未登入即為訪客 */}
+            <span className="user-chip">👤 {user ? user.name : '訪客'}</span>
             {can('Game_Leaderboard_Search') && (
               <button type="button" className="btn-secondary" onClick={onOpenLeaderboard}>
                 🏆 排行榜
               </button>
             )}
-            <button type="button" className="btn-secondary" onClick={() => void logout()}>
-              登出
-            </button>
+            {user ? (
+              <button type="button" className="btn-secondary" onClick={() => void logout()}>
+                登出
+              </button>
+            ) : (
+              <button type="button" className="btn-secondary" onClick={leaveGuest}>
+                註冊 / 登入
+              </button>
+            )}
             <SoundToggle />
           </div>
         </div>

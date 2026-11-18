@@ -9,6 +9,10 @@ interface Props {
   isNewBest: boolean;
   /** 是否有下一關 */
   hasNext: boolean;
+  /** 訪客模式:成績不會上傳,改提示註冊 */
+  isGuest: boolean;
+  /** 訪客點「註冊上榜」:回到登入/註冊畫面 */
+  onSignUp: () => void;
   onRetry: () => void;
   onNext: () => void;
   onBackToLevels: () => void;
@@ -20,6 +24,8 @@ export function ResultScreen({
   outcome,
   isNewBest,
   hasNext,
+  isGuest,
+  onSignUp,
   onRetry,
   onNext,
   onBackToLevels,
@@ -45,6 +51,15 @@ export function ResultScreen({
         {outcome.score} <small>分</small>
         {cleared && isNewBest && <span className="badge-new">最佳紀錄!</span>}
       </div>
+
+      {cleared && isGuest && (
+        <div className="guest-note">
+          <p>訪客的成績不會登上排行榜,註冊後就能和大家一起比分數!</p>
+          <button type="button" className="btn-secondary" onClick={onSignUp}>
+            註冊 / 登入
+          </button>
+        </div>
+      )}
 
       <div className="result-stats">
         <div>
